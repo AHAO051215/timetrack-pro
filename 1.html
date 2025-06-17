@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimeTrack Pro - 多语言打卡系统</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --primary: #4a6cf7;
+            --primary-light: #6c8af9;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --darker: #1e2229;
+            --border-radius: 12px;
+            --box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e0e7ff 0%, #d1e0fd 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .container {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 100%;
+            max-width: 1200px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 90vh;
+        }
+        
+        /* 登录页面样式 */
+        .auth-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            flex-grow: 1;
+            background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .auth-box {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            z-index: 10;
+            position: relative;
+        }
+        
+        .auth-title {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+            font-weight: 700;
+        }
+        
+        .auth-subtitle {
+            color: var(--secondary);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--secondary);
+            transition: var(--transition);
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+            position: relative;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .input-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
+        }
+        
+        .password-rule {
+            font-size: 0.85rem;
+            color: var(--secondary);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .password-rule i {
+            color: var(--success);
+        }
+        
+        .auth-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            width: 100%;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(74, 108, 247, 0.3);
+        }
+        
+        .auth-btn:hover {
+            background: #3a5be0;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(74, 108, 247, 0.4);
+        }
+        
+        .switch-auth {
+            margin-top: 20px;
+            color: var(--secondary);
+            font-size: 0.95rem;
+        }
+        
+        .switch-auth a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .error-message {
+            color: var(--danger);
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
+        .company-logo {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: white;
+            z-index: 5;
+        }
+        
+        .boss-link {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            color: white;
+            font-weight: 600;
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+        
+        .boss-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .device-info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* 主应用样式 */
+        .app-container {
+            display: none;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        
+        header {
+            background: linear-gradient(120deg, var(--primary) 0%, #657ef8 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-icon {
+            font-size: 2rem;
+        }
+        
+        .logo-text {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+        
+        .user-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .language-switcher {
+            display: flex;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px;
+            border-radius: 30px;
+        }
+        
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .lang-btn:hover, .lang-btn.active {
+            background: white;
+            color: var(--primary);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 15px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .user-info:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+        
+        .user-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .logout-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        main {
+            padding: 30px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title i {
+            color: var(--primary);
+        }
+        
+        .today-info {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex-grow: 1;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #edf2f7;
+        }
+        
+        .info-label {
+            color: var(--secondary);
+        }
+        
+        .info-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .overtime {
+            color: var(--danger);
+            font-weight: 700;
+        }
+        
+        .punch-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .punch-buttons {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .punch-btn {
+            flex: 1;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 18px;
+            font-size: 1.2rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(74, 108, 247, 0.3);
+        }
+        
+        .punch-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(74, 108, 247, 0.4);
+        }
+        
+        .punch-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .punch-btn.checked {
+            background: var(--success);
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        }
+        
+        .punch-btn.off-work {
+            background: var(--warning);
+            color: var(--dark);
+            box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+        }
+        
+        .punch-btn.off-work.checked {
+            background: var(--danger);
+            color: white;
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+        }
+        
+        .punch-status {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        .map-container {
+            flex-grow: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #map {
+            height: 100%;
+            width: 100%;
+            min-height: 200px;
+        }
+        
+        .map-overlay {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .history-section {
+            margin-top: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+        
+        .history-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .date-filter {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .history-list {
+            flex-grow: 1;
+            list-style: none;
+            overflow-y: auto;
+            max-height: 300px;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            padding: 15px;
+        }
+        
+        .history-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .history-item.clock-out {
+            border-left-color: var(--warning);
+        }
+        
+        .history-item.overtime {
+            border-left-color: var(--danger);
+        }
+        
+        .history-item:hover {
+            transform: translateX(3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .history-date {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+        
+        .history-time {
+            background: var(--light);
+            color: var(--dark);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .history-type {
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+        
+        .overtime-badge {
+            background: var(--danger);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .no-data {
+            text-align: center;
+            color: var(--secondary);
+            padding: 30px;
+            font-style: italic;
+        }
+        
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 0.9rem;
+        }
+        
+        /* BOSS后台样式 */
+        .boss-container {
+            display: none;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        
+        .boss-header {
+            background: linear-gradient(120deg, #2c3e50 0%, #4a6580 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .boss-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .boss-main {
+            padding: 30px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .boss-section {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .overtime-cell {
+            color: var(--danger);
+            font-weight: 600;
+        }
+        
+        .back-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        
+        .back-btn:hover {
+            background: #3a5be0;
+        }
+        
+        /* 设备图标 */
+        .device-icon {
+            font-size: 1.2rem;
+            margin-right: 5px;
+        }
+        
+        .device-ios { color: #000; }
+        .device-android { color: #3ddc84; }
+        .device-samsung { color: #1428a0; }
+        .device-huawei { color: #ff0000; }
+        
+        /* 泰语特殊字体样式 */
+        .thai-font {
+            font-family: 'Noto Sans Thai', 'Segoe UI', Tahoma, sans-serif;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .punch-buttons {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header, .boss-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .user-controls {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .auth-box {
+                padding: 30px 20px;
+            }
+            
+            main, .boss-main {
+                padding: 20px;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .history-controls {
+                width: 100%;
+            }
+            
+            .device-info {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                margin-top: 20px;
+                background: rgba(0, 0, 0, 0.2);
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .card {
+                padding: 20px;
+            }
+            
+            .punch-btn {
+                padding: 15px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录/注册页面 -->
+    <div class="container" id="auth-container">
+        <div class="company-logo">
+            <i class="fas fa-fingerprint"></i>
+            <span>TimeTrack Pro</span>
+        </div>
+        
+        <a href="#" id="boss-login-link" class="boss-link thai-font">เข้าสู่ระบบ BOSS</a>
+        
+        <div class="auth-container">
+            <div class="auth-box">
+                <h1 class="auth-title thai-font">ระบบลงเวลาทำงาน</h1>
+                <p class="auth-subtitle thai-font">ระบบลงเวลาเข้า-ออกงาน และคำนวณค่าล่วงเวลา</p>
+                
+                <div class="tabs">
+                    <div class="tab active thai-font" id="login-tab">เข้าสู่ระบบ</div>
+                    <div class="tab thai-font" id="register-tab">ลงทะเบียน</div>
+                </div>
+                
+                <!-- 登录表单 -->
+                <div id="login-form">
+                    <div class="input-group">
+                        <label for="login-username" class="thai-font">ชื่อผู้ใช้</label>
+                        <input type="text" id="login-username" placeholder="กรอกชื่อผู้ใช้">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="login-password" class="thai-font">รหัสผ่าน</label>
+                        <input type="password" id="login-password" placeholder="กรอกรหัสผ่าน">
+                        <div class="password-rule thai-font">
+                            <i class="fas fa-info-circle"></i> รหัสผ่านต้องเป็น: company123
+                        </div>
+                    </div>
+                    
+                    <button class="auth-btn thai-font" id="login-btn">เข้าสู่ระบบ</button>
+                    
+                    <div class="error-message" id="login-error"></div>
+                </div>
+                
+                <!-- 注册表单 -->
+                <div id="register-form" style="display: none;">
+                    <div class="input-group">
+                        <label for="register-name" class="thai-font">ชื่อ-นามสกุล</label>
+                        <input type="text" id="register-name" placeholder="กรอกชื่อ-นามสกุล">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="register-username" class="thai-font">ชื่อผู้ใช้</label>
+                        <input type="text" id="register-username" placeholder="กรอกชื่อผู้ใช้">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="register-password" class="thai-font">รหัสผ่าน</label>
+                        <input type="password" id="register-password" placeholder="กรอกรหัสผ่าน">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="register-confirm" class="thai-font">ยืนยันรหัสผ่าน</label>
+                        <input type="password" id="register-confirm" placeholder="กรอกรหัสผ่านอีกครั้ง">
+                        <div class="password-rule thai-font">
+                            <i class="fas fa-info-circle"></i> รหัสผ่านต้องเป็น: company123
+                        </div>
+                    </div>
+                    
+                    <button class="auth-btn thai-font" id="register-btn">ลงทะเบียน</button>
+                    
+                    <div class="error-message" id="register-error"></div>
+                </div>
+                
+                <div class="switch-auth">
+                    <span id="switch-text" class="thai-font">ยังไม่มีบัญชี? </span>
+                    <a id="switch-link" class="thai-font">ลงทะเบียนตอนนี้</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="device-info" id="device-info">
+            <i class="fas fa-mobile-alt"></i>
+            <span id="device-name">กำลังตรวจสอบอุปกรณ์...</span>
+        </div>
+        
+        <footer>
+            <p class="thai-font">© 2023 ระบบลงเวลาทำงาน - พัฒนาด้วย ❤️</p>
+        </footer>
+    </div>
+    
+    <!-- 主应用 -->
+    <div class="container app-container" id="app-container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">⏱️</div>
+                <div class="logo-text thai-font" id="app-title">ระบบลงเวลา</div>
+            </div>
+            
+            <div class="user-controls">
+                <div class="language-switcher">
+                    <button class="lang-btn" data-lang="zh">中文</button>
+                    <button class="lang-btn active" data-lang="th">ไทย</button>
+                    <button class="lang-btn" data-lang="en">English</button>
+                </div>
+                
+                <div class="user-info" id="user-info">
+                    <div class="user-avatar">👤</div>
+                    <div class="user-name thai-font" id="header-username">สมชาย ใจดี</div>
+                </div>
+                
+                <button class="logout-btn" id="logout-btn" title="ออกจากระบบ">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            <div class="dashboard">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-calendar-day"></i> <span class="thai-font" id="today-title">ข้อมูลวันนี้</span></h3>
+                    <div class="today-info">
+                        <div class="info-row">
+                            <span class="info-label thai-font">วันที่</span>
+                            <span class="info-value" id="today-date">17 มิถุนายน 2023</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label thai-font">อุปกรณ์</span>
+                            <span class="info-value" id="device-info-value">iPhone 13 Pro</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label thai-font">สถานะการทำงาน</span>
+                            <span class="info-value" id="work-status">กำลังทำงาน</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label thai-font">เวลาทำงานวันนี้</span>
+                            <span class="info-value" id="work-hours">6:22:15</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label thai-font">เวลาล่วงเวลา</span>
+                            <span class="info-value overtime" id="overtime-hours">0:00:00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-fingerprint"></i> <span class="thai-font" id="punch-title">ลงเวลา</span></h3>
+                    <div class="punch-section">
+                        <div class="punch-buttons">
+                            <button class="punch-btn" id="clock-in-btn">
+                                <i class="fas fa-sign-in-alt"></i>
+                                <span class="thai-font" id="clock-in-text">ลงเวลาเข้า</span>
+                                <span class="punch-status thai-font" id="clock-in-status"></span>
+                            </button>
+                            <button class="punch-btn off-work" id="clock-out-btn">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span class="thai-font" id="clock-out-text">ลงเวลาออก</span>
+                                <span class="punch-status thai-font" id="clock-out-status"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-map-marker-alt"></i> <span class="thai-font" id="location-title">ตำแหน่งปัจจุบัน</span></h3>
+                    <div class="map-container">
+                        <div id="map"></div>
+                        <div class="map-overlay thai-font" id="location-info">
+                            <i class="fas fa-sync-alt fa-spin"></i> กำลังระบุตำแหน่ง...
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="history-section">
+                <div class="section-header">
+                    <h3 class="section-title thai-font" id="history-title">ประวัติการลงเวลา</h3>
+                    <div class="history-controls">
+                        <select class="date-filter" id="date-filter">
+                            <option value="7" class="thai-font">7 วันที่ผ่านมา</option>
+                            <option value="30" class="thai-font">30 วันที่ผ่านมา</option>
+                            <option value="all" class="thai-font">ทั้งหมด</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <ul class="history-list" id="history-list">
+                    <!-- 历史记录将通过JS动态生成 -->
+                </ul>
+            </div>
+        </main>
+        
+        <footer>
+            <p class="thai-font" id="footer-text">© 2023 ระบบลงเวลาทำงาน - พัฒนาด้วย ❤️</p>
+        </footer>
+    </div>
+    
+    <!-- BOSS后台 -->
+    <div class="container boss-container" id="boss-container">
+        <header class="boss-header">
+            <div class="boss-title thai-font">ระบบจัดการ BOSS</div>
+            <button class="back-btn" id="boss-back-btn">
+                <i class="fas fa-arrow-left"></i>
+                <span class="thai-font">กลับไปยังหน้าเข้าสู่ระบบ</span>
+            </button>
+        </header>
+        
+        <main class="boss-main">
+            <div class="boss-section">
+                <h3 class="section-title thai-font">รายชื่อพนักงาน</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="thai-font">ID</th>
+                                <th class="thai-font">ชื่อ-นามสกุล</th>
+                                <th class="thai-font">ชื่อผู้ใช้</th>
+                                <th class="thai-font">วันที่ลงทะเบียน</th>
+                                <th class="thai-font">อุปกรณ์</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employee-table">
+                            <!-- 员工数据将通过JS动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="boss-section">
+                <h3 class="section-title thai-font">ประวัติการลงเวลาทั้งหมด</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="thai-font">พนักงาน</th>
+                                <th class="thai-font">วันที่</th>
+                                <th class="thai-font">เวลา</th>
+                                <th class="thai-font">ประเภท</th>
+                                <th class="thai-font">อุปกรณ์</th>
+                                <th class="thai-font">เวลาทำงาน</th>
+                                <th class="thai-font">ล่วงเวลา</th>
+                                <th class="thai-font">ตำแหน่ง</th>
+                            </tr>
+                        </thead>
+                        <tbody id="punch-history-table">
+                            <!-- 打卡记录将通过JS动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p class="thai-font">© 2023 ระบบจัดการ BOSS - สำหรับผู้ดูแลระบบ</p>
+        </footer>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // 多语言文本资源
+        const translations = {
+            th: {
+                appTitle: "ระบบลงเวลา",
+                todayTitle: "ข้อมูลวันนี้",
+                punchTitle: "ลงเวลา",
+                historyTitle: "ประวัติการลงเวลา",
+                footerText: "© 2023 ระบบลงเวลาทำงาน - พัฒนาด้วย ❤️",
+                clockInText: "ลงเวลาเข้า",
+                clockOutText: "ลงเวลาออก",
+                notClockedIn: "ยังไม่ได้ลงเวลา",
+                clockedInAt: "ลงเวลาเข้าแล้ว: ",
+                clockedOutAt: "ลงเวลาออกแล้ว: ",
+                workStatus: "สถานะการทำงาน",
+                working: "กำลังทำงาน",
+                offWork: "เลิกงานแล้ว",
+                today: "วันนี้",
+                date: "วันที่",
+                currentTime: "เวลาปัจจุบัน",
+                workHours: "เวลาทำงานวันนี้",
+                overtimeHours: "เวลาล่วงเวลา",
+                noHistory: "ไม่มีประวัติการลงเวลา",
+                last7Days: "7 วันที่ผ่านมา",
+                last30Days: "30 วันที่ผ่านมา",
+                all: "ทั้งหมด",
+                overtime: "ล่วงเวลา",
+                loginTitle: "เข้าสู่ระบบ",
+                registerTitle: "ลงทะเบียน",
+                nameLabel: "ชื่อ-นามสกุล",
+                usernameLabel: "ชื่อผู้ใช้",
+                passwordLabel: "รหัสผ่าน",
+                confirmPassword: "ยืนยันรหัสผ่าน",
+                loginBtn: "เข้าสู่ระบบ",
+                registerBtn: "ลงทะเบียน",
+                switchToRegister: "ยังไม่มีบัญชี? ลงทะเบียนตอนนี้",
+                switchToLogin: "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ",
+                passwordRule: "รหัสผ่านต้องเป็น: company123",
+                registerSuccess: "ลงทะเบียนสำเร็จ! กรุณาเข้าสู่ระบบ",
+                passwordError: "รหัสผ่านไม่ถูกต้อง ต้องเป็น: company123",
+                passwordMismatch: "รหัสผ่านไม่ตรงกัน",
+                requiredField: "กรุณากรอกข้อมูลให้ครบทุกช่อง",
+                userExists: "ชื่อผู้ใช้นี้มีอยู่แล้ว",
+                locationTitle: "ตำแหน่งปัจจุบัน",
+                locating: "กำลังระบุตำแหน่ง...",
+                locationError: "ไม่สามารถระบุตำแหน่งได้",
+                locationSuccess: "ตำแหน่งปัจจุบัน",
+                bossTitle: "ระบบจัดการ BOSS",
+                employees: "รายชื่อพนักงาน",
+                allPunchHistory: "ประวัติการลงเวลาทั้งหมด",
+                employee: "พนักงาน",
+                punchDate: "วันที่",
+                punchTime: "เวลา",
+                punchType: "ประเภท",
+                workTime: "เวลาทำงาน",
+                overTime: "ล่วงเวลา",
+                location: "ตำแหน่ง",
+                clockIn: "เข้างาน",
+                clockOut: "ออกงาน",
+                backToLogin: "กลับไปยังหน้าเข้าสู่ระบบ",
+                device: "อุปกรณ์"
+            },
+            zh: {
+                appTitle: "打卡系统",
+                todayTitle: "今日信息",
+                punchTitle: "打卡",
+                historyTitle: "打卡记录",
+                footerText: "© 2023 打卡系统 - 用心制作 ❤️",
+                clockInText: "上班打卡",
+                clockOutText: "下班打卡",
+                notClockedIn: "未打卡",
+                clockedInAt: "上班打卡时间: ",
+                clockedOutAt: "下班打卡时间: ",
+                workStatus: "工作状态",
+                working: "工作中",
+                offWork: "已下班",
+                today: "今天",
+                date: "日期",
+                currentTime: "当前时间",
+                workHours: "今日工作时长",
+                overtimeHours: "加班时长",
+                noHistory: "暂无打卡记录",
+                last7Days: "最近7天",
+                last30Days: "最近30天",
+                all: "全部",
+                overtime: "加班",
+                loginTitle: "登录系统",
+                registerTitle: "用户注册",
+                nameLabel: "姓名",
+                usernameLabel: "用户名",
+                passwordLabel: "密码",
+                confirmPassword: "确认密码",
+                loginBtn: "登录",
+                registerBtn: "注册",
+                switchToRegister: "没有账户? 立即注册",
+                switchToLogin: "已有账户? 立即登录",
+                passwordRule: "密码必须为: company123",
+                registerSuccess: "注册成功! 请登录",
+                passwordError: "密码不正确，必须为: company123",
+                passwordMismatch: "密码不匹配",
+                requiredField: "请填写所有字段",
+                userExists: "用户名已存在",
+                locationTitle: "当前位置",
+                locating: "定位中...",
+                locationError: "无法获取位置",
+                locationSuccess: "当前位置",
+                bossTitle: "BOSS管理系统",
+                employees: "员工列表",
+                allPunchHistory: "所有打卡记录",
+                employee: "员工",
+                punchDate: "日期",
+                punchTime: "时间",
+                punchType: "类型",
+                workTime: "工作时间",
+                overTime: "加班时间",
+                location: "位置",
+                clockIn: "上班",
+                clockOut: "下班",
+                backToLogin: "返回登录页面",
+                device: "设备"
+            },
+            en: {
+                appTitle: "Punch System",
+                todayTitle: "Today's Info",
+                punchTitle: "Punch",
+                historyTitle: "Punch History",
+                footerText: "© 2023 Punch System - Made with ❤️",
+                clockInText: "Clock In",
+                clockOutText: "Clock Out",
+                notClockedIn: "Not punched",
+                clockedInAt: "Clocked in: ",
+                clockedOutAt: "Clocked out: ",
+                workStatus: "Work Status",
+                working: "Working",
+                offWork: "Off Work",
+                today: "Today",
+                date: "Date",
+                currentTime: "Current Time",
+                workHours: "Work Hours Today",
+                overtimeHours: "Overtime Hours",
+                noHistory: "No punch history",
+                last7Days: "Last 7 Days",
+                last30Days: "Last 30 Days",
+                all: "All",
+                overtime: "Overtime",
+                loginTitle: "Login",
+                registerTitle: "Register",
+                nameLabel: "Full Name",
+                usernameLabel: "Username",
+                passwordLabel: "Password",
+                confirmPassword: "Confirm Password",
+                loginBtn: "Login",
+                registerBtn: "Register",
+                switchToRegister: "Don't have an account? Register now",
+                switchToLogin: "Already have an account? Login now",
+                passwordRule: "Password must be: company123",
+                registerSuccess: "Registration successful! Please login",
+                passwordError: "Invalid password, must be: company123",
+                passwordMismatch: "Passwords do not match",
+                requiredField: "Please fill in all fields",
+                userExists: "Username already exists",
+                locationTitle: "Current Location",
+                locating: "Locating...",
+                locationError: "Unable to get location",
+                locationSuccess: "Current location",
+                bossTitle: "BOSS Management System",
+                employees: "Employee List",
+                allPunchHistory: "All Punch Records",
+                employee: "Employee",
+                punchDate: "Date",
+                punchTime: "Time",
+                punchType: "Type",
+                workTime: "Work Time",
+                overTime: "Over Time",
+                location: "Location",
+                clockIn: "Clock In",
+                clockOut: "Clock Out",
+                backToLogin: "Back to Login",
+                device: "Device"
+            }
+        };
+
+        // 用户存储
+        let users = JSON.parse(localStorage.getItem('users')) || [
+            { id: 1, username: "user1", password: "company123", name: "สมชาย ใจดี", regDate: "2023-06-10", device: "iPhone 13 Pro" },
+            { id: 2, username: "user2", password: "company123", name: "สุภาพร นิ่มนวล", regDate: "2023-06-12", device: "Samsung Galaxy S22" }
+        ];
+        
+        // BOSS用户
+        const bossUser = { username: "BOSS", password: "BOSS123", name: "BOSS" };
+        
+        // 当前用户
+        let currentUser = null;
+        let currentLang = 'th';
+        
+        // 打卡记录
+        let punchRecords = JSON.parse(localStorage.getItem('punchRecords')) || [];
+        
+        // 地图变量
+        let map = null;
+        let userMarker = null;
+        let userLocation = null;
+        
+        // 设备信息
+        let deviceInfo = {
+            type: "Unknown",
+            name: "Unknown Device",
+            icon: "fas fa-mobile-alt"
+        };
+        
+        // DOM元素
+        const elements = {
+            authContainer: document.getElementById('auth-container'),
+            appContainer: document.getElementById('app-container'),
+            bossContainer: document.getElementById('boss-container'),
+            appTitle: document.getElementById('app-title'),
+            todayTitle: document.getElementById('today-title'),
+            punchTitle: document.getElementById('punch-title'),
+            historyTitle: document.getElementById('history-title'),
+            footerText: document.getElementById('footer-text'),
+            loginUsername: document.getElementById('login-username'),
+            loginPassword: document.getElementById('login-password'),
+            loginBtn: document.getElementById('login-btn'),
+            registerName: document.getElementById('register-name'),
+            registerUsername: document.getElementById('register-username'),
+            registerPassword: document.getElementById('register-password'),
+            registerConfirm: document.getElementById('register-confirm'),
+            registerBtn: document.getElementById('register-btn'),
+            logoutBtn: document.getElementById('logout-btn'),
+            bossLoginLink: document.getElementById('boss-login-link'),
+            bossBackBtn: document.getElementById('boss-back-btn'),
+            headerUsername: document.getElementById('header-username'),
+            todayDate: document.getElementById('today-date'),
+            currentTime: document.getElementById('current-time'),
+            workStatus: document.getElementById('work-status'),
+            workHours: document.getElementById('work-hours'),
+            overtimeHours: document.getElementById('overtime-hours'),
+            clockInBtn: document.getElementById('clock-in-btn'),
+            clockOutBtn: document.getElementById('clock-out-btn'),
+            clockInText: document.getElementById('clock-in-text'),
+            clockOutText: document.getElementById('clock-out-text'),
+            clockInStatus: document.getElementById('clock-in-status'),
+            clockOutStatus: document.getElementById('clock-out-status'),
+            historyList: document.getElementById('history-list'),
+            langButtons: document.querySelectorAll('.lang-btn'),
+            dateFilter: document.getElementById('date-filter'),
+            userInfo: document.getElementById('user-info'),
+            loginTab: document.getElementById('login-tab'),
+            registerTab: document.getElementById('register-tab'),
+            loginForm: document.getElementById('login-form'),
+            registerForm: document.getElementById('register-form'),
+            switchText: document.getElementById('switch-text'),
+            switchLink: document.getElementById('switch-link'),
+            loginError: document.getElementById('login-error'),
+            registerError: document.getElementById('register-error'),
+            locationInfo: document.getElementById('location-info'),
+            locationTitle: document.getElementById('location-title'),
+            employeeTable: document.getElementById('employee-table'),
+            punchHistoryTable: document.getElementById('punch-history-table'),
+            deviceInfo: document.getElementById('device-info'),
+            deviceName: document.getElementById('device-name'),
+            deviceInfoValue: document.getElementById('device-info-value')
+        };
+        
+        // 检测设备类型
+        function detectDevice() {
+            const userAgent = navigator.userAgent;
+            
+            // 检测苹果设备
+            if (/iPhone|iPad|iPod/i.test(userAgent)) {
+                deviceInfo = {
+                    type: "iOS",
+                    name: "Apple Device",
+                    icon: "fab fa-apple device-ios"
+                };
+                
+                // 检测具体型号
+                if (/iPhone/.test(userAgent)) {
+                    if (/iPhone 15/.test(userAgent)) deviceInfo.name = "iPhone 15";
+                    else if (/iPhone 14/.test(userAgent)) deviceInfo.name = "iPhone 14";
+                    else if (/iPhone 13/.test(userAgent)) deviceInfo.name = "iPhone 13";
+                    else if (/iPhone 12/.test(userAgent)) deviceInfo.name = "iPhone 12";
+                    else deviceInfo.name = "iPhone";
+                }
+            }
+            // 检测安卓设备
+            else if (/Android/i.test(userAgent)) {
+                deviceInfo = {
+                    type: "Android",
+                    name: "Android Device",
+                    icon: "fab fa-android device-android"
+                };
+                
+                // 检测三星设备
+                if (/Samsung/i.test(userAgent)) {
+                    deviceInfo.type = "Samsung";
+                    deviceInfo.icon = "fas fa-mobile-alt device-samsung";
+                    
+                    if (/SM-S918B/.test(userAgent)) deviceInfo.name = "Samsung Galaxy S23 Ultra";
+                    else if (/SM-S901B/.test(userAgent)) deviceInfo.name = "Samsung Galaxy S22";
+                    else if (/SM-G991B/.test(userAgent)) deviceInfo.name = "Samsung Galaxy S21";
+                    else deviceInfo.name = "Samsung Device";
+                }
+                // 检测华为设备
+                else if (/Huawei|Honor/i.test(userAgent)) {
+                    deviceInfo.type = "Huawei";
+                    deviceInfo.icon = "fas fa-mobile-alt device-huawei";
+                    
+                    if (/LIO-AL00/.test(userAgent)) deviceInfo.name = "Huawei Mate 30 Pro";
+                    else if (/ELS-AN00/.test(userAgent)) deviceInfo.name = "Huawei P40 Pro";
+                    else deviceInfo.name = "Huawei Device";
+                }
+                // 其他安卓设备
+                else {
+                    if (/Pixel/.test(userAgent)) deviceInfo.name = "Google Pixel";
+                    else if (/Mi/.test(userAgent)) deviceInfo.name = "Xiaomi Device";
+                    else if (/OnePlus/.test(userAgent)) deviceInfo.name = "OnePlus Device";
+                }
+            }
+            
+            // 更新设备信息显示
+            elements.deviceInfo.innerHTML = `
+                <i class="${deviceInfo.icon}"></i>
+                <span>${deviceInfo.name}</span>
+            `;
+            elements.deviceName.textContent = deviceInfo.name;
+            
+            if (elements.deviceInfoValue) {
+                elements.deviceInfoValue.textContent = deviceInfo.name;
+            }
+            
+            return deviceInfo;
+        }
+        
+        // 初始化
+        function init() {
+            // 检测设备
+            detectDevice();
+            
+            // 检查是否已登录
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            if (loggedInUser) {
+                currentUser = JSON.parse(loggedInUser);
+                if (currentUser.username === "BOSS") {
+                    showBossDashboard();
+                } else {
+                    showApp();
+                }
+            }
+            
+            // 设置语言切换事件
+            elements.langButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    switchLanguage(btn.dataset.lang);
+                });
+            });
+            
+            // 登录按钮事件
+            elements.loginBtn.addEventListener('click', login);
+            
+            // 注册按钮事件
+            elements.registerBtn.addEventListener('click', register);
+            
+            // 登出按钮事件
+            elements.logoutBtn.addEventListener('click', logout);
+            
+            // 打卡按钮事件
+            elements.clockInBtn.addEventListener('click', () => punch('in'));
+            elements.clockOutBtn.addEventListener('click', () => punch('out'));
+            
+            // 日期过滤事件
+            elements.dateFilter.addEventListener('change', renderHistory);
+            
+            // 用户信息点击事件
+            elements.userInfo.addEventListener('click', () => {
+                alert(`${currentUser.name}\nID: ${currentUser.id}\n${translations[currentLang].device}: ${currentUser.device || deviceInfo.name}`);
+            });
+            
+            // 标签切换事件
+            elements.loginTab.addEventListener('click', () => showLoginForm());
+            elements.registerTab.addEventListener('click', () => showRegisterForm());
+            elements.switchLink.addEventListener('click', () => {
+                if (elements.loginForm.style.display === 'none') {
+                    showLoginForm();
+                } else {
+                    showRegisterForm();
+                }
+            });
+            
+            // BOSS登录链接
+            elements.bossLoginLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                showBossLogin();
+            });
+            
+            // BOSS返回按钮
+            elements.bossBackBtn.addEventListener('click', () => {
+                logout();
+                showLoginForm();
+            });
+            
+            // 更新时间
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            
+            // 初始化语言
+            switchLanguage(currentLang);
+            
+            // 初始化地图
+            initMap();
+        }
+        
+        // 初始化地图
+        function initMap() {
+            // 创建地图（默认位置为曼谷）
+            map = L.map('map').setView([13.7563, 100.5018], 13);
+            
+            // 添加OpenStreetMap图层
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // 尝试获取用户位置
+            getLocation();
+        }
+        
+        // 获取用户位置
+        function getLocation() {
+            if (navigator.geolocation) {
+                elements.locationInfo.innerHTML = `<i class="fas fa-sync-alt fa-spin"></i> ${translations[currentLang].locating}`;
+                
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        userLocation = { lat, lng };
+                        
+                        // 更新地图位置
+                        map.setView([lat, lng], 15);
+                        
+                        // 添加标记
+                        if (userMarker) {
+                            map.removeLayer(userMarker);
+                        }
+                        
+                        userMarker = L.marker([lat, lng]).addTo(map)
+                            .bindPopup(translations[currentLang].locationSuccess)
+                            .openPopup();
+                        
+                        // 显示位置信息
+                        elements.locationInfo.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${translations[currentLang].locationSuccess}: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                    },
+                    (error) => {
+                        console.error("Error getting location:", error);
+                        elements.locationInfo.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${translations[currentLang].locationError}`;
+                    }
+                );
+            } else {
+                elements.locationInfo.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${translations[currentLang].locationError}`;
+            }
+        }
+        
+        // 显示登录表单
+        function showLoginForm() {
+            elements.loginForm.style.display = 'block';
+            elements.registerForm.style.display = 'none';
+            elements.loginTab.classList.add('active');
+            elements.registerTab.classList.remove('active');
+            elements.switchText.textContent = translations[currentLang].switchToRegister.split('?')[0] + '?';
+            elements.switchLink.textContent = translations[currentLang].switchToRegister.split('?')[1];
+            
+            // 显示登录页面
+            elements.authContainer.style.display = 'flex';
+            elements.appContainer.style.display = 'none';
+            elements.bossContainer.style.display = 'none';
+        }
+        
+        // 显示注册表单
+        function showRegisterForm() {
+            elements.loginForm.style.display = 'none';
+            elements.registerForm.style.display = 'block';
+            elements.loginTab.classList.remove('active');
+            elements.registerTab.classList.add('active');
+            elements.switchText.textContent = translations[currentLang].switchToLogin.split('?')[0] + '?';
+            elements.switchLink.textContent = translations[currentLang].switchToLogin.split('?')[1];
+        }
+        
+        // 显示BOSS登录
+        function showBossLogin() {
+            showLoginForm();
+            elements.loginUsername.value = "BOSS";
+            elements.loginPassword.value = "";
+            elements.loginUsername.disabled = true;
+        }
+        
+        // 显示主应用
+        function showApp() {
+            elements.authContainer.style.display = 'none';
+            elements.appContainer.style.display = 'flex';
+            elements.bossContainer.style.display = 'none';
+            updatePunchStatus();
+            renderHistory();
+            switchLanguage(currentLang);
+            
+            // 更新位置
+            getLocation();
+            
+            // 更新设备信息
+            if (currentUser && !currentUser.device) {
+                currentUser.device = deviceInfo.name;
+                localStorage.setItem('loggedInUser', JSON.stringify(currentUser));
+            }
+            
+            if (elements.deviceInfoValue) {
+                elements.deviceInfoValue.textContent = currentUser.device || deviceInfo.name;
+            }
+        }
+        
+        // 显示BOSS后台
+        function showBossDashboard() {
+            elements.authContainer.style.display = 'none';
+            elements.appContainer.style.display = 'none';
+            elements.bossContainer.style.display = 'flex';
+            
+            // 渲染BOSS后台数据
+            renderEmployeeList();
+            renderBossPunchHistory();
+        }
+        
+        // 登录功能
+        function login() {
+            const username = elements.loginUsername.value.trim();
+            const password = elements.loginPassword.value.trim();
+            
+            if (!username || !password) {
+                showError('login', translations[currentLang].requiredField);
+                return;
+            }
+            
+            // 检查BOSS登录
+            if (username === "BOSS" && password === bossUser.password) {
+                currentUser = bossUser;
+                localStorage.setItem('loggedInUser', JSON.stringify(currentUser));
+                showBossDashboard();
+                return;
+            }
+            
+            // 检查普通用户登录
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                
+                // 更新设备信息
+                if (!currentUser.device) {
+                    currentUser.device = deviceInfo.name;
+                }
+                
+                localStorage.setItem('loggedInUser', JSON.stringify(user));
+                showApp();
+            } else {
+                showError('login', 'Invalid username or password');
+            }
+            
+            // 重置用户名禁用状态
+            elements.loginUsername.disabled = false;
+        }
+        
+        // 注册功能
+        function register() {
+            const name = elements.registerName.value.trim();
+            const username = elements.registerUsername.value.trim();
+            const password = elements.registerPassword.value.trim();
+            const confirm = elements.registerConfirm.value.trim();
+            
+            if (!name || !username || !password || !confirm) {
+                showError('register', translations[currentLang].requiredField);
+                return;
+            }
+            
+            // 检查统一密码
+            if (password !== "company123") {
+                showError('register', translations[currentLang].passwordError);
+                return;
+            }
+            
+            // 检查密码匹配
+            if (password !== confirm) {
+                showError('register', translations[currentLang].passwordMismatch);
+                return;
+            }
+            
+            // 检查用户名是否已存在
+            if (users.some(u => u.username === username)) {
+                showError('register', translations[currentLang].userExists);
+                return;
+            }
+            
+            // 创建新用户
+            const newUser = {
+                id: Date.now(),
+                username: username,
+                password: password,
+                name: name,
+                regDate: new Date().toISOString().split('T')[0],
+                device: deviceInfo.name
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            // 显示成功信息
+            showError('register', translations[currentLang].registerSuccess, true);
+            
+            // 清空表单
+            elements.registerName.value = '';
+            elements.registerUsername.value = '';
+            elements.registerPassword.value = '';
+            elements.registerConfirm.value = '';
+            
+            // 3秒后切换到登录表单
+            setTimeout(() => {
+                showLoginForm();
+            }, 3000);
+        }
+        
+        // 显示错误信息
+        function showError(form, message, isSuccess = false) {
+            const errorElement = form === 'login' ? elements.loginError : elements.registerError;
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            errorElement.style.color = isSuccess ? 'var(--success)' : 'var(--danger)';
+            errorElement.style.background = isSuccess ? '#e8f5e9' : '#ffebee';
+        }
+        
+        // 登出功能
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('loggedInUser');
+            showLoginForm();
+        }
+        
+        // 切换语言
+        function switchLanguage(lang) {
+            currentLang = lang;
+            
+            if (!currentUser) {
+                // 更新登录/注册页面
+                elements.authTitle.textContent = lang === 'th' ? "ระบบลงเวลาทำงาน" : 
+                                               lang === 'zh' ? "打卡系统" : "Punch System";
+                
+                elements.authSubtitle.textContent = translations[lang].loginTitle;
+                
+                // 更新表单标签
+                document.querySelectorAll('.input-group label')[0].textContent = translations[lang].usernameLabel;
+                document.querySelectorAll('.input-group label')[1].textContent = translations[lang].passwordLabel;
+                document.querySelectorAll('.input-group label')[2].textContent = translations[lang].nameLabel;
+                document.querySelectorAll('.input-group label')[3].textContent = translations[lang].usernameLabel;
+                document.querySelectorAll('.input-group label')[4].textContent = translations[lang].passwordLabel;
+                document.querySelectorAll('.input-group label')[5].textContent = translations[lang].confirmPassword;
+                
+                // 更新按钮文本
+                elements.loginBtn.textContent = translations[lang].loginBtn;
+                elements.registerBtn.textContent = translations[lang].registerBtn;
+                
+                // 更新密码规则
+                document.querySelector('.password-rule').textContent = translations[lang].passwordRule;
+                
+                // 更新标签
+                elements.loginTab.textContent = translations[lang].loginTitle;
+                elements.registerTab.textContent = translations[lang].registerTitle;
+                
+                // 更新切换链接
+                if (elements.loginForm.style.display === 'none') {
+                    elements.switchText.textContent = translations[lang].switchToLogin.split('?')[0] + '?';
+                    elements.switchLink.textContent = translations[lang].switchToLogin.split('?')[1];
+                } else {
+                    elements.switchText.textContent = translations[lang].switchToRegister.split('?')[0] + '?';
+                    elements.switchLink.textContent = translations[lang].switchToRegister.split('?')[1];
+                }
+                
+                // 更新BOSS链接
+                elements.bossLoginLink.textContent = translations[lang].switchToLogin.replace('?', ' BOSS');
+                
+                // 更新设备信息
+                elements.deviceName.textContent = deviceInfo.name;
+                
+                return;
+            }
+            
+            // 更新员工应用UI
+            if (currentUser.username !== "BOSS") {
+                elements.appTitle.textContent = translations[lang].appTitle;
+                elements.todayTitle.textContent = translations[lang].todayTitle;
+                elements.punchTitle.textContent = translations[lang].punchTitle;
+                elements.historyTitle.textContent = translations[lang].historyTitle;
+                elements.footerText.textContent = translations[lang].footerText;
+                elements.clockInText.textContent = translations[lang].clockInText;
+                elements.clockOutText.textContent = translations[lang].clockOutText;
+                elements.workStatus.textContent = translations[lang].workStatus + ":";
+                elements.headerUsername.textContent = currentUser.name;
+                elements.locationTitle.textContent = translations[lang].locationTitle;
+                
+                // 更新日期过滤选项
+                const options = elements.dateFilter.querySelectorAll('option');
+                options[0].textContent = translations[lang].last7Days;
+                options[1].textContent = translations[lang].last30Days;
+                options[2].textContent = translations[lang].all;
+                
+                // 更新打卡状态
+                updatePunchStatus();
+                
+                // 更新历史记录
+                renderHistory();
+            } 
+            // 更新BOSS后台UI
+            else {
+                document.querySelector('.boss-title').textContent = translations[lang].bossTitle;
+                document.querySelectorAll('.section-title')[0].textContent = translations[lang].employees;
+                document.querySelectorAll('.section-title')[1].textContent = translations[lang].allPunchHistory;
+                elements.bossBackBtn.querySelector('span').textContent = translations[lang].backToLogin;
+                
+                // 更新表头
+                const headers = document.querySelectorAll('th');
+                headers[0].textContent = translations[lang].employee;
+                headers[1].textContent = translations[lang].punchDate;
+                headers[2].textContent = translations[lang].punchTime;
+                headers[3].textContent = translations[lang].punchType;
+                headers[4].textContent = translations[lang].device;
+                headers[5].textContent = translations[lang].workTime;
+                headers[6].textContent = translations[lang].overTime;
+                headers[7].textContent = translations[lang].location;
+                
+                // 重新渲染数据
+                renderEmployeeList();
+                renderBossPunchHistory();
+            }
+            
+            // 更新语言按钮状态
+            elements.langButtons.forEach(btn => {
+                if (btn.dataset.lang === lang) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+        
+        // 更新日期和时间
+        function updateDateTime() {
+            const now = new Date();
+            
+            // 格式化日期
+            const dateOptions = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                weekday: 'long'
+            };
+            
+            const timeOptions = { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+            
+            elements.todayDate.textContent = now.toLocaleDateString(currentLang, dateOptions);
+            elements.currentTime.textContent = now.toLocaleTimeString(currentLang, timeOptions);
+            
+            // 更新工作时间
+            updateWorkHours();
+        }
+        
+        // 打卡功能
+        function punch(type) {
+            const now = new Date();
+            const today = now.toDateString();
+            
+            // 检查是否已打卡
+            const todayRecord = punchRecords.find(record => 
+                record.userId === currentUser.id && 
+                new Date(record.timestamp).toDateString() === today &&
+                record.type === type
+            );
+            
+            if (todayRecord) {
+                alert(translations[currentLang][type === 'in' ? 'clockedInAt' : 'clockedOutAt'] + 
+                      new Date(todayRecord.timestamp).toLocaleTimeString());
+                return;
+            }
+            
+            // 创建打卡记录
+            const record = {
+                id: Date.now(),
+                userId: currentUser.id,
+                username: currentUser.username,
+                name: currentUser.name,
+                type: type,
+                timestamp: now.getTime(),
+                date: now.toLocaleDateString(currentLang, { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric'
+                }),
+                time: now.toLocaleTimeString(currentLang, { hour: '2-digit', minute: '2-digit' }),
+                location: userLocation ? `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : "N/A",
+                device: currentUser.device || deviceInfo.name
+            };
+            
+            punchRecords.push(record);
+            localStorage.setItem('punchRecords', JSON.stringify(punchRecords));
+            
+            // 更新UI
+            updatePunchStatus();
+            renderHistory();
+            updateWorkHours();
+            
+            alert(`${type === 'in' ? translations[currentLang].clockInText : translations[currentLang].clockOutText} ${translations[currentLang].success}!`);
+        }
+        
+        // 更新打卡状态
+        function updatePunchStatus() {
+            const now = new Date();
+            const today = now.toDateString();
+            
+            // 获取今天的打卡记录
+            const todayRecords = punchRecords.filter(record => 
+                record.userId === currentUser.id && 
+                new Date(record.timestamp).toDateString() === today
+            );
+            
+            const clockInRecord = todayRecords.find(r => r.type === 'in');
+            const clockOutRecord = todayRecords.find(r => r.type === 'out');
+            
+            // 更新打卡按钮状态
+            if (clockInRecord) {
+                elements.clockInBtn.classList.add('checked');
+                elements.clockInStatus.textContent = translations[currentLang].clockedInAt + 
+                    new Date(clockInRecord.timestamp).toLocaleTimeString(currentLang);
+            } else {
+                elements.clockInBtn.classList.remove('checked');
+                elements.clockInStatus.textContent = translations[currentLang].notClockedIn;
+            }
+            
+            if (clockOutRecord) {
+                elements.clockOutBtn.classList.add('checked');
+                elements.clockOutStatus.textContent = translations[currentLang].clockedOutAt + 
+                    new Date(clockOutRecord.timestamp).toLocaleTimeString(currentLang);
+                elements.workStatus.textContent = translations[currentLang].offWork;
+            } else {
+                elements.clockOutBtn.classList.remove('checked');
+                elements.clockOutStatus.textContent = translations[currentLang].notClockedIn;
+                elements.workStatus.textContent = clockInRecord ? 
+                    translations[currentLang].working : 
+                    translations[currentLang].offWork;
+            }
+        }
+        
+        // 更新工作时间
+        function updateWorkHours() {
+            const now = new Date();
+            const today = now.toDateString();
+            
+            // 获取今天的打卡记录
+            const todayRecords = punchRecords.filter(record => 
+                record.userId === currentUser.id && 
+                new Date(record.timestamp).toDateString() === today
+            ).sort((a, b) => a.timestamp - b.timestamp);
+            
+            let workHours = 0;
+            let overtime = 0;
+            
+            // 计算工作时间
+            if (todayRecords.length >= 2) {
+                const clockIn = todayRecords.find(r => r.type === 'in');
+                const clockOut = todayRecords.find(r => r.type === 'out');
+                
+                if (clockIn && clockOut) {
+                    workHours = (clockOut.timestamp - clockIn.timestamp) / 1000 / 60 / 60; // 小时
+                    
+                    // 计算加班时间（超过8小时）
+                    if (workHours > 8) {
+                        overtime = workHours - 8;
+                        workHours = 8;
+                    }
+                }
+            } else if (todayRecords.length === 1 && todayRecords[0].type === 'in') {
+                // 已打卡上班但未下班
+                const clockInTime = todayRecords[0].timestamp;
+                workHours = (now.getTime() - clockInTime) / 1000 / 60 / 60;
+                
+                // 计算加班时间（超过8小时）
+                if (workHours > 8) {
+                    overtime = workHours - 8;
+                    workHours = 8;
+                }
+            }
+            
+            // 格式化时间显示
+            elements.workHours.textContent = formatTime(workHours);
+            elements.overtimeHours.textContent = formatTime(overtime);
+        }
+        
+        // 格式化时间 (小时转换为 HH:MM:SS)
+        function formatTime(hours) {
+            const totalSeconds = Math.floor(hours * 3600);
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+        
+        // 渲染历史记录
+        function renderHistory() {
+            const filterValue = elements.dateFilter.value;
+            const now = new Date();
+            let filteredRecords = punchRecords.filter(record => 
+                record.userId === currentUser.id
+            );
+            
+            // 应用日期过滤
+            if (filterValue !== 'all') {
+                const days = parseInt(filterValue);
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - days);
+                
+                filteredRecords = filteredRecords.filter(record => 
+                    new Date(record.timestamp) >= cutoffDate
+                );
+            }
+            
+            // 按时间排序（最新的在前）
+            filteredRecords.sort((a, b) => b.timestamp - a.timestamp);
+            
+            // 渲染列表
+            if (filteredRecords.length === 0) {
+                elements.historyList.innerHTML = `<li class="no-data thai-font">${translations[currentLang].noHistory}</li>`;
+                return;
+            }
+            
+            elements.historyList.innerHTML = filteredRecords.map(record => {
+                const recordDate = new Date(record.timestamp);
+                const isOvertime = record.type === 'out' && record.overtime;
+                
+                return `
+                    <li class="history-item ${record.type === 'out' ? 'clock-out' : ''} ${isOvertime ? 'overtime' : ''}">
+                        <div>
+                            <div class="history-date">${record.date}</div>
+                            <div class="history-type">${record.type === 'in' ? 
+                                translations[currentLang].clockInText : 
+                                translations[currentLang].clockOutText}</div>
+                        </div>
+                        <div>
+                            <div class="history-time">${record.time}</div>
+                            ${isOvertime ? `<div class="overtime-badge thai-font">${translations[currentLang].overtime}</div>` : ''}
+                        </div>
+                    </li>
+                `;
+            }).join('');
+        }
+        
+        // 渲染员工列表
+        function renderEmployeeList() {
+            elements.employeeTable.innerHTML = users
+                .filter(user => user.username !== "BOSS")
+                .map(user => `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.name}</td>
+                        <td>${user.username}</td>
+                        <td>${user.regDate}</td>
+                        <td>${user.device || translations[currentLang].device}</td>
+                    </tr>
+                `)
+                .join('');
+        }
+        
+        // 渲染BOSS打卡历史
+        function renderBossPunchHistory() {
+            // 计算每个打卡记录的工作时间
+            const recordsWithHours = punchRecords.map(record => {
+                // 查找对应的下班记录
+                if (record.type === 'in') {
+                    const clockOutRecord = punchRecords.find(r => 
+                        r.userId === record.userId && 
+                        r.type === 'out' && 
+                        new Date(r.timestamp).toDateString() === new Date(record.timestamp).toDateString()
+                    );
+                    
+                    if (clockOutRecord) {
+                        const workHours = (clockOutRecord.timestamp - record.timestamp) / 1000 / 60 / 60;
+                        const overtime = workHours > 8 ? workHours - 8 : 0;
+                        return { ...record, workHours, overtime };
+                    }
+                }
+                return { ...record, workHours: 0, overtime: 0 };
+            }).filter(record => record.type === 'in');
+            
+            elements.punchHistoryTable.innerHTML = recordsWithHours
+                .map(record => `
+                    <tr>
+                        <td>${record.name}</td>
+                        <td>${record.date}</td>
+                        <td>${record.time}</td>
+                        <td>${record.type === 'in' ? translations[currentLang].clockIn : translations[currentLang].clockOut}</td>
+                        <td>${record.device || translations[currentLang].device}</td>
+                        <td>${formatTime(record.workHours)}</td>
+                        <td class="overtime-cell">${formatTime(record.overtime)}</td>
+                        <td>${record.location || "N/A"}</td>
+                    </tr>
+                `)
+                .join('');
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
